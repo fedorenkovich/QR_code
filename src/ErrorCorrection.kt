@@ -13,7 +13,7 @@ class ErrorCorrection(private val errorCorrectionWords: Int) {
 
     private fun initializeGaloisField() {
         var x = 1
-        for (i in 0 until gfSize) {
+        for (i in 0..<gfSize) {
             gfExp[i] = x
             gfLog[x] = i
 
@@ -22,7 +22,7 @@ class ErrorCorrection(private val errorCorrectionWords: Int) {
                 x = x xor gfPoly // Применяем полином для приведения в поле
             }
         }
-        for (i in gfSize until gfExp.size) {
+        for (i in gfSize..<gfExp.size) {
             gfExp[i] = gfExp[i - gfSize] // Дублируем экспоненциальную таблицу
         }
     }
@@ -46,7 +46,7 @@ class ErrorCorrection(private val errorCorrectionWords: Int) {
 
     private fun generateGeneratorPolynomial(ecWords: Int): IntArray {
         var generator = intArrayOf(1)
-        for (i in 0 until ecWords) {
+        for (i in 0..<ecWords) {
             val term = intArrayOf(1, gfExp[i])
             generator = multiplyPolynomials(generator, term)
         }

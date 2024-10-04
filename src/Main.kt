@@ -9,7 +9,7 @@ fun bitStringToByteArray(bitString: String): IntArray {
         val byteString = bitString.substring(byteStart, byteEnd).padEnd(8, '0')
         byteArray[i] = byteString.toInt(2)
     }
-    return byteArray
+    return byteArray    
 }
 
 fun main() {
@@ -32,8 +32,16 @@ fun main() {
     val errorCorrectionWords = 10 // Задайте количество слов коррекции ошибок
     val rsEncoder = ErrorCorrection(errorCorrectionWords)
     val finalData = rsEncoder.encode(dataBytes)
+    val byteArray = ByteArray(finalData.size) { i -> finalData[i].toByte() }
+
 
     println("Final encoded data with error correction: ${finalData.joinToString(", ")}")
+
+    //Отрисовка QR кода
+    val qrDrawer = QRCodeDrawer()
+    // Рисуем QR-код и сохраняем в файл
+    qrDrawer.drawQRCode(finalData, "D:\\ЛЭТИ\\АиСД\\Второй семестр\\Курсовая работа\\qrcode_v1.png")
+    println("QR-код сохранён как 'qrcode_v1.png'.")
     /*val qrEncoder = QREncoder()
 
     val numericData = "01234567"
