@@ -25,7 +25,7 @@ class QRCodeDrawer {
 
     // Рисуем тайминг-паттерн (timing pattern)
     private fun drawTimingPattern(matrix: Array<IntArray>) {
-        for (i in 8 until size - 8) {
+        for (i in 8..<size - 8) {
             matrix[6][i] = if (i % 2 == 0) 1 else 0
             matrix[i][6] = if (i % 2 == 0) 1 else 0
         }
@@ -94,8 +94,8 @@ class QRCodeDrawer {
         val graphics: Graphics2D = image.createGraphics()
 
         // Рисуем черные и белые клетки
-        for (i in 0 until size) {
-            for (j in 0 until size) {
+        for (i in 0..<size) {
+            for (j in 0..<size) {
                 val color = if (matrix[i][j] == 1) Color.BLACK else Color.WHITE
                 graphics.color = color
                 graphics.fillRect(j * scale, i * scale, scale, scale)
