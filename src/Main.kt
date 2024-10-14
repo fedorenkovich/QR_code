@@ -13,12 +13,20 @@ fun bitStringToByteArray(bitString: String): IntArray {
 }
 
 fun main() {
-    val qrEncoder = QREncoder()
+    val qrEncoder = QRCodeEncoder()
+
+    //Меню программы
+    println("Напишите текст, которые хотите закодировать:\n")
+    val data = readln()
 
     // Выберите данные для кодирования и режим
-    val data = "HELLO WORLD"
-    val mode = QREncoder.Mode.ALPHANUMERIC
-    val version = 1
+    //val data = "HELLO WORLD"
+    //val mode = QRCodeEncoder.Mode.ALPHANUMERIC
+    val mode = qrEncoder.determineEncodingMode(data)
+    //val version = 1
+    val dataLength = data.length
+    val errorCorrectionLevel = QRCodeEncoder.ErrorCorrectionLevel.L
+    val version = qrEncoder.determineVersion(dataLength, mode, errorCorrectionLevel)
 
     // Шаг 1: Кодируем данные
     val encodedData = qrEncoder.encodeData(data, mode, version)

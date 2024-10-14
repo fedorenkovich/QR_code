@@ -1,6 +1,6 @@
 import java.nio.charset.Charset
 
-class QREncoder {
+class QRCodeEncoder {
     // Определение режимов кодирования
     enum class Mode(val modeIndicator: String) {
         NUMERIC("0001"),
@@ -9,8 +9,97 @@ class QREncoder {
         KANJI("1000")
     }
 
+    // Определение уровней коррекции ошибок
+    enum class ErrorCorrectionLevel {
+        L, M, Q, H
+    }
+
     // Таблица символов для буквенно-цифрового режима
     private val alphanumericTable = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:"
+
+    // Таблица вместимости для каждой версии и уровня коррекции ошибок
+    private val capacityTable = mapOf(
+        Mode.NUMERIC to arrayOf(
+            intArrayOf(41, 34, 27, 17),  // Версия 1: L, M, Q, H
+            intArrayOf(77, 63, 48, 34),  // Версия 2: L, M, Q, H
+            intArrayOf(127, 101, 77, 58), // Версия 3: L, M, Q, H
+            // Добавьте сюда другие версии...
+        ),
+        Mode.ALPHANUMERIC to arrayOf(
+            intArrayOf(25, 20, 16, 10),  // Версия 1: L, M, Q, H
+            intArrayOf(47, 38, 29, 20),  // Версия 2: L, M, Q, H
+            intArrayOf(77, 61, 47, 35),  // Версия 3: L, M, Q, H
+            // Добавьте сюда другие версии...
+        ),
+        Mode.BYTE to arrayOf(
+            intArrayOf(17, 14, 11, 7),   // Версия 1: L, M, Q, H
+            intArrayOf(32, 26, 20, 14),  // Версия 2: L, M, Q, H
+            intArrayOf(53, 42, 32, 24),  // Версия 3: L, M, Q, H
+            // Добавьте сюда другие версии...
+        ),
+        Mode.KANJI to arrayOf(
+            intArrayOf(10, 8, 7, 4),     // Версия 1: L, M, Q, H
+            intArrayOf(20, 16, 12, 8),   // Версия 2: L, M, Q, H
+            intArrayOf(32, 26, 20, 15),  // Версия 3: L, M, Q, H
+        )
+    )
+
+    // Определение типа кодировки
+    fun determineEncodingMode(data: String): Mode {
+        // Проверяем, можно ли использовать числовую кодировку
+        if (data.all { it.isDigit() }) {
+            return Mode.NUMERIC
+        }
+
+        // Проверяем, можно ли использовать буквенно-цифровую кодировку
+        if (data.all { it in alphanumericTable }) {
+            return Mode.ALPHANUMERIC
+        }
+
+        // Проверяем, можно ли использовать кандзи
+        if (isKanji(data)) {
+            return Mode.KANJI
+        }
+
+        // В остальных случаях используется байтовая кодировка
+        return Mode.BYTE
+    }
+
+    // Определение версии QR-кода
+    fun determineVersion(dataLength: Int, mode: QRCodeEncoder.Mode, errorCorrectionLevel: ErrorCorrectionLevel): Int {
+        val levelIndex = when (errorCorrectionLevel) {
+            ErrorCorrectionLevel.L -> 0
+            ErrorCorrectionLevel.M -> 1
+            ErrorCorrectionLevel.Q -> 2
+            ErrorCorrectionLevel.H -> 3
+        }
+
+        // Ищем минимальную версию, которая поддерживает данное количество данных
+        val capacities = capacityTable[mode] ?: throw IllegalArgumentException("Unsupported mode: $mode")
+        for (version in capacities.indices) {
+            if (dataLength <= capacities[version][levelIndex]) {
+                return version + 1 // Возвращаем версию (индексация с 0, поэтому +1)
+            }
+        }
+
+        throw IllegalArgumentException("Data too long to fit in any QR code version")
+    }
+
+    // Проверка на соответствие кандзи-символам
+    private fun isKanji(data: String): Boolean {
+        val sjisBytes = data.toByteArray(Charset.forName("Shift_JIS"))
+        var i = 0
+        while (i < sjisBytes.size) {
+            val byte1 = sjisBytes[i].toInt() and 0xFF
+            val byte2 = sjisBytes.getOrNull(i + 1)?.toInt() ?: return false
+            if ((byte1 in 0x81..0x9F || byte1 in 0xE0..0xEA) && byte2 in 0x40..0xFC) {
+                i += 2
+            } else {
+                return false
+            }
+        }
+        return true
+    }
 
     // Кодирование числового режима
     private fun encodeNumeric(data: String): String {
