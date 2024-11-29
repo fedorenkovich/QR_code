@@ -66,7 +66,7 @@ class QRCodeEncoder {
     }
 
     // Определение версии QR-кода
-    fun determineVersion(dataLength: Int, mode: QRCodeEncoder.Mode, errorCorrectionLevel: ErrorCorrectionLevel): Int {
+    fun determineVersion(dataLength: Int, mode: Mode, errorCorrectionLevel: ErrorCorrectionLevel): Int {
         val levelIndex = when (errorCorrectionLevel) {
             ErrorCorrectionLevel.L -> 0
             ErrorCorrectionLevel.M -> 1

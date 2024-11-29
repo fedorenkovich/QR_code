@@ -69,7 +69,7 @@ class ErrorCorrection(private val errorCorrectionWords: Int) {
             val coefficient = dividend[i]
             if (coefficient != 0) {
                 for (j in generator.indices) {
-                    dividend[i + j] = dividend[i + j] xor gfMultiply(generator[j], coefficient)
+                    dividend[i + j] = dividend[i + j] xor gfDivide(generator[j], coefficient)
                 }
             }
         }
